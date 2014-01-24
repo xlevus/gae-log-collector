@@ -2,7 +2,7 @@
 
 import sys, os
 
-package_dir = "packages"
+package_dir = "../../packages"
 package_dir_path = os.path.join(os.path.dirname(__file__), package_dir)
 
 for filename in sorted(os.listdir(package_dir_path)):

@@ -1,0 +1,10 @@
+flask-testing==0.4
+pudb==2013.3.6
+
+PIL==1.1.7
+
+# Fabengine - needed to pack requirements for deployment
+git+https://github.com/xlevus/fabengine.git
+
+-r requirements.txt
+
