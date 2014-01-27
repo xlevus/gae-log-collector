@@ -2,10 +2,13 @@ import time
 import random
 
 import flask
+import logging
 from google.appengine.ext import ndb
 from google.appengine.api import channel
 
 channel_bp = flask.Blueprint('channels', __name__)
+logger = logging.getLogger(__name__)
+logger.setLevel(level=logging.DEBUG)
 
 
 class ChannelClient(ndb.Model):
@@ -23,7 +26,7 @@ class ChannelManager(object):
 
     def remove(self, client_id):
         if client_id:
-            ndb.Key(id=client_id).delete()
+            ndb.Key(ChannelClient, client_id).delete()
 
     def clients(self):
         for key in ChannelClient.query().iter(keys_only=True):

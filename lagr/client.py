@@ -1,16 +1,34 @@
 import json
 import logging
+import flask
+import datetime
+import urllib2
 
 HOST = 'localhost:8080'
-PROTO = 'https'
-
+PROTO = 'http'
+URL = 'lagr/api/v1/'
 
 class LagrHandler(logging.Handler):
+    def __init__(self, application=None, host=None, proto=None, url=None, level=logging.NOTSET):
+        if flask.has_request_context():
+            self.host = flask.current_app.config['HOST']
+            self.proto = flask.current_app.config['PROTO']
+            self.url = flask.current_app.config['URL']
+            self.application = flask.current_app.config['APPLICATION']
+        else:
+            self.host = host
+            self.proto = proto
+            self.url = url
+            self.application = application
+
+        super(LagrHandler, self).__init__(level)
+
     def format_record(self, r):
-        return json.dumps({
+        dd = {
+            'application': self.application,
             'message': self.format(r),
 
-            'time': r.created,
+            'time': datetime.datetime.fromtimestamp(int(r.created)).strftime("%H:%M%:%S %d/%m/%Y"),
 
             'raw_msg': r.msg,
             'msg_args': r.args,
@@ -23,7 +41,13 @@ class LagrHandler(logging.Handler):
 
             'module': r.module,
             'func_name': r.funcName,
-        })
+            'plugins': []
+        }
+
+        for index, plugin in enumerate(r.alerts):
+            dd['plugins'].append(plugin.serialize(index, r))
+
+        return json.dumps(dd)
 
     def handleError(self, record):
         print record
@@ -32,13 +56,17 @@ class LagrHandler(logging.Handler):
         record = self.format_record(record)
         self.make_request(record)
 
-    def make_request(self, data):
-        import urllib2
+    def make_request(self, record):
+        url = '%(proto)s://%(host)s/%(url)s' % {
+                'proto': self.proto,
+                'host': self.host,
+                'url': self.url
+            }
         req = urllib2.Request(
-            'http://localhost:8080/lagr/api/v1/',
+            url,
             headers={'Content-Type':'application/json'},
-            data=data)
-        urllib2.urlopen(req)
+            data=record)
+        response = urllib2.urlopen(req)
 
 
 class LagrGAEHandler(LagrHandler):
@@ -48,13 +76,19 @@ class LagrGAEHandler(LagrHandler):
 
         super(LagrGAEHandler, self).__init__(level)
 
-    def make_request(self, url, record):
+    def make_request(self, data):
+        url = '%(proto)s://%(host)s/%(url)s' % {
+                'proto': self.proto,
+                'host': self.host,
+                'url': self.url
+            }
+
         from google.appengine.ext import ndb
         ctx = ndb.get_context()
 
         future = ctx.urlfetch(
             url=url,
-            payload = json.dumps(record),
+            payload = json.dumps(data),
             method='POST',
             headers={'Content-Type':'application/json'},
             deadline=self.deadline)
