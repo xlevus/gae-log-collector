@@ -1,14 +1,20 @@
 import flask
 import os
+import sys
+import traceback
 import logging
 from lagr.client import LagrGAEHandler
-from lagr import plugins
+from lagr.server import plugins
 
 from .channels import manager
 
 static_folder = os.path.join(os.path.split(__file__)[0], 'static')
 templates_folder = os.path.join(os.path.split(__file__)[0], 'templates')
 
+APP = "Test app"
+HOST = "localhost:8080"
+URL = 'lagr/api/v1'
+PROTO = 'http'
 
 ui_bp = flask.Blueprint('ui', __name__, static_folder=static_folder, template_folder=templates_folder)
 
@@ -22,11 +28,23 @@ def index():
 logger = logging.getLogger(__name__)
 
 logger.setLevel(logging.DEBUG)
-logger.addHandler(LagrGAEHandler(logging.DEBUG,async=True))
+logger.addHandler(LagrGAEHandler(application=APP, host=HOST, proto=PROTO, url=URL, level=logging.DEBUG,async=False))
 
 
 @ui_bp.route('/test_view')
 def test_view():
-    alert = plugins.Alert(system='HipChat', recipients='bingo')
-    logger.info("Info message", extra={'alerts': [alert,]})
+    trigger = plugins.HideBelowThreshold(threshold=5)
+    alert = plugins.HipChatAlert(room='python-temp')
+    expiration = plugins.Expiration(hours=24)
+    trigger.add(alert)
+    trigger.add(expiration)
+    try:
+        1/0
+    except Exception as e:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        logger.info("Info message - should be shown on realtime monitor", extra={
+            'trigger': trigger,
+            'exception': e.message,
+            'traceback': traceback.format_tb(exc_traceback, 20)
+            })
     return "Sent."

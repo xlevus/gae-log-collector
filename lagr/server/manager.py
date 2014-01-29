@@ -1,19 +1,26 @@
 from werkzeug.utils import import_string
+import logging
+import json
 
+logger = logging.getLogger(__name__)
 
 class LogManager(object):
     """ This class has the responsibility to handle the log server-side (so plays with caches etc. etc. """
 
-    @classmethod
-    def process_log(cls, log):
-        import pdb; pdb.set_trace()
+    def process_log(self, log):
+        trigger = log.get('trigger', None)
+        if trigger is not None:
+            plugins = trigger.pop('plugins')
 
-        for plugin in log['plugins']:
-            key = plugin.pop("key")
-            plugin_id = plugin.pop("__id__")
-            plugin.update({'id': plugin_id})
-            klass = import_string(key)
-            plugin_obj = klass(**plugin)
+            trigger_key = trigger.pop('key')
+            trigger_obj = import_string(trigger_key)(**trigger)
+
+            for plugin in plugins:
+                plugin_key = plugin.pop("key")
+                klass = import_string(plugin_key)
+                plugin_obj = klass(**plugin)
+                trigger_obj.add(plugin_obj)
 
             # Plugin execution
-            plugin_obj.execute()
+            trigger_obj.verify(log)
+

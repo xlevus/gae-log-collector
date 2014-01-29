@@ -10,16 +10,11 @@ URL = 'lagr/api/v1/'
 
 class LagrHandler(logging.Handler):
     def __init__(self, application=None, host=None, proto=None, url=None, level=logging.NOTSET):
-        if flask.has_request_context():
-            self.host = flask.current_app.config['HOST']
-            self.proto = flask.current_app.config['PROTO']
-            self.url = flask.current_app.config['URL']
-            self.application = flask.current_app.config['APPLICATION']
-        else:
-            self.host = host
-            self.proto = proto
-            self.url = url
-            self.application = application
+
+        self.host = host
+        self.proto = proto
+        self.url = url
+        self.application = application
 
         super(LagrHandler, self).__init__(level)
 
@@ -41,13 +36,25 @@ class LagrHandler(logging.Handler):
 
             'module': r.module,
             'func_name': r.funcName,
-            'plugins': []
+            'trigger': [],
+
         }
 
-        for index, plugin in enumerate(r.alerts):
-            dd['plugins'].append(plugin.serialize(index, r))
+        if hasattr(r, 'traceback'):
+            dd.update({
+                'traceback': r.traceback
+            })
 
-        return json.dumps(dd)
+        if hasattr(r, 'exception'):
+            dd.update({
+                'exception': r.exception
+            })
+
+        if hasattr(r, 'trigger'):
+                dd['trigger'] = r.trigger.serialize(r)
+
+        print json.dumps(dd)
+        return dd
 
     def handleError(self, record):
         print record
@@ -65,16 +72,17 @@ class LagrHandler(logging.Handler):
         req = urllib2.Request(
             url,
             headers={'Content-Type':'application/json'},
-            data=record)
+            data=json.dumps(record))
+
         response = urllib2.urlopen(req)
 
 
 class LagrGAEHandler(LagrHandler):
-    def __init__(self, level=logging.NOTSET, async=True, deadline=30):
+    def __init__(self, application=None, host=None, proto=None, url=None, level=logging.NOTSET, async=True, deadline=30):
         self.async = async
         self.deadline = deadline
 
-        super(LagrGAEHandler, self).__init__(level)
+        super(LagrGAEHandler, self).__init__(application=application, host=host, proto=proto, url=url, level=level)
 
     def make_request(self, data):
         url = '%(proto)s://%(host)s/%(url)s' % {
