@@ -1,4 +1,4 @@
 cron:
 - description: Daily log cleanup
-  url: /_q/logs
+  url: /_q/LogDeletionQueue/
   schedule: every 1 hours

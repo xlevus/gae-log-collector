@@ -24,12 +24,17 @@ def index():
 
 
 logger = logging.getLogger(__name__)
+logger2 = logging.getLogger(__name__)
 
 logger.setLevel(logging.DEBUG)
 logger.addHandler(LagrGAEHandler(application=APP, host=HOST, proto=PROTO, url=URL, level=logging.DEBUG,async=False))
 
 
-@ui_bp.route('/test_view')
+
+logger2.setLevel(logging.DEBUG)
+logger2.addHandler(LagrGAEHandler(application="Test App 2", host=HOST, proto=PROTO, url=URL, level=logging.DEBUG,async=False))
+
+# @ui_bp.route('/test_view')
 def test_view():
     trigger = plugins.HideBelowThreshold(threshold=5)
     alert = plugins.HipChatAlert(room='python-temp')
@@ -40,9 +45,17 @@ def test_view():
         1/0
     except Exception as e:
         exc_type, exc_value, exc_traceback = sys.exc_info()
-        logger.info("Info message - should be shown on realtime monitor", extra={
-            'trigger': trigger,
-            'exception': e.message,
-            'traceback': traceback.format_tb(exc_traceback, 20)
-            })
+        for i in range(20):
+
+            logger.info("Info message - should be shown on realtime monitor", extra={
+                'trigger': trigger,
+                'exception': e.message,
+                'traceback': traceback.format_tb(exc_traceback, 20)
+                })
+            logger2.info("Info message - should be shown on realtime monitor", extra={
+                'trigger': trigger,
+                'exception': e.message,
+                'traceback': traceback.format_tb(exc_traceback, 20)
+                })
     return "Sent."
+
