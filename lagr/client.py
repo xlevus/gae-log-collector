@@ -96,7 +96,7 @@ class LagrGAEHandler(LagrHandler):
 
         future = ctx.urlfetch(
             url=url,
-            payload = json.dumps(data),
+            payload=json.dumps(data),
             method='POST',
             headers={'Content-Type':'application/json'},
             deadline=self.deadline)

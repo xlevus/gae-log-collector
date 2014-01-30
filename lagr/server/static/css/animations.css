@@ -1,0 +1,7 @@
+.animate-enter{
+    outline: 1px #ff0000 solid;
+}
+
+.animate-enter-active {
+    background-color: red;
+}

@@ -1,4 +1,4 @@
-var app = angular.module("RealTimeApp", []);
+var app = angular.module("RealTimeApp", ['ngAnimate']);
 
 var LogController = function($scope){
     $scope.logs = {};

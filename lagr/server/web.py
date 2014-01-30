@@ -1,7 +1,6 @@
 import flask
 
 lagr_server = flask.Flask(__name__)
-lagr_server.config.update({"APPLICATION": "Bingo"})
 from .api import api_bp
 lagr_server.register_blueprint(api_bp, url_prefix='/lagr/api')
 

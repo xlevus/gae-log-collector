@@ -2,6 +2,7 @@ try:
     from google.appengine.api import memcache
 except ImportError:
     pass
+
 from lagr.server.models import Log
 
 import requests
@@ -12,7 +13,6 @@ logger = logging.getLogger(__name__)
 HIPCHAT_API_URL = 'https://api.hipchat.com/v1/'
 HIPCHAT_API_TOKEN = '329c9b499ffb8d087a8cd6988e8084'
 ROOM_MESSAGE_URL = 'rooms/message'
-ROOMS_LIST_URL = 'rooms/list'
 
 
 class Serializable(object):

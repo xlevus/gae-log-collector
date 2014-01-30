@@ -20,9 +20,7 @@ ui_bp = flask.Blueprint('ui', __name__, static_folder=static_folder, template_fo
 
 @ui_bp.route('/')
 def index():
-    return flask.render_template(
-        'index.html',
-        token=manager.new())
+    return flask.render_template('index.html', token=manager.new())
 
 
 logger = logging.getLogger(__name__)
