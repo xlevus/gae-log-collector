@@ -3,6 +3,7 @@ try:
 except ImportError:
     pass
 
+from google.appengine.api import mail
 from lagr.server.models import Log
 
 import requests
@@ -13,6 +14,8 @@ logger = logging.getLogger(__name__)
 HIPCHAT_API_URL = 'https://api.hipchat.com/v1/'
 HIPCHAT_API_TOKEN = '329c9b499ffb8d087a8cd6988e8084'
 ROOM_MESSAGE_URL = 'rooms/message'
+
+EMAIL_IDS = ['h.gokulnath@gmail.com']
 
 
 class Serializable(object):
@@ -171,3 +174,60 @@ class Expiration(Plugin):
     def execute(self, log):
         self.log = log
         Log.create(log, self.hours)
+
+class EmailAlert(Plugin):
+
+    TEMPLATE = """
+    <table>
+        <tr>
+            <td><strong>Application</strong>: %(application)s</td>
+        </tr>
+        <tr>
+            <td><strong>Timestamp</strong>: %(time)s</td>
+        </tr>
+        <tr>
+            <td><strong>Message</strong>: %(message)s</td>
+        </tr>
+        <tr>
+            <td><strong>Traceback</strong>: %(traceback)s</td>
+        </tr>
+        <tr>
+            <td><strong>Exception</strong>: %(exception)s</td>
+        </tr>
+
+    </table>
+    """
+
+    def __init__(self, email_ids=EMAIL_IDS):
+        self.email_ids = email_ids
+
+    def _format(self, log):
+
+        return self.TEMPLATE % {
+            'application': log['application'],
+            'time': log['time'],
+            'message': log['message'],
+            'traceback': ''.join(log['traceback']),
+            'exception': log['exception'],
+        }
+
+    def serialize(self):
+
+        b_info = super(EmailAlert, self).base_info()
+
+        b_info.update({
+                'email_ids': self.email_ids
+            })
+
+        return b_info
+
+    def execute(self, log):
+        """ Reacts to the trigger. """
+        logger.info("<<< Executing %s" % self.__class__.__name__)
+
+        message = mail.EmailMessage(sender='test@example.com')
+        subject = 'LAGR monitor Alert - Application: %s - Timestamp: %s' % (log['application'], log['time'])
+        message.subject = subject
+        message.to = ', '.join(self.email_ids)
+        message.html = self._format(log),
+        message.send()

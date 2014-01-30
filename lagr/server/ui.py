@@ -34,13 +34,15 @@ logger.addHandler(LagrGAEHandler(application=APP, host=HOST, proto=PROTO, url=UR
 logger2.setLevel(logging.DEBUG)
 logger2.addHandler(LagrGAEHandler(application="Test App 2", host=HOST, proto=PROTO, url=URL, level=logging.DEBUG,async=False))
 
-# @ui_bp.route('/test_view')
+@ui_bp.route('/test_view')
 def test_view():
     trigger = plugins.HideBelowThreshold(threshold=5)
     alert = plugins.HipChatAlert(room='python-temp')
     expiration = plugins.Expiration(hours=24)
+    email = plugins.EmailAlert()
     trigger.add(alert)
     trigger.add(expiration)
+    trigger.add(email)
     try:
         1/0
     except Exception as e:
