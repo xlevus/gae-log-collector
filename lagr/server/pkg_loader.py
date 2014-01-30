@@ -1,5 +1,3 @@
-# insert packages directory onto sys.path
-
 import sys, os
 
 package_dir = "../../packages"
@@ -13,5 +11,5 @@ for filename in sorted(os.listdir(package_dir_path)):
         sys.path.insert(0, pth_file)
 sys.path.insert(0, package_dir_path)
 
-from .web import lagr_server as app
 
+from .web import lagr_server as app
