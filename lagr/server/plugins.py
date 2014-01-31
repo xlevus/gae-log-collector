@@ -15,6 +15,7 @@ HIPCHAT_API_URL = 'https://api.hipchat.com/v1/'
 HIPCHAT_API_TOKEN = '329c9b499ffb8d087a8cd6988e8084'
 ROOM_MESSAGE_URL = 'rooms/message'
 
+EMAIL_SENDER = 'test@example.com'
 EMAIL_IDS = ['h.gokulnath@gmail.com']
 
 
@@ -225,7 +226,7 @@ class EmailAlert(Plugin):
         """ Reacts to the trigger. """
         logger.info("<<< Executing %s" % self.__class__.__name__)
 
-        message = mail.EmailMessage(sender='test@example.com')
+        message = mail.EmailMessage(sender=EMAIL_SENDER)
         subject = 'LAGR monitor Alert - Application: %s - Timestamp: %s' % (log['application'], log['time'])
         message.subject = subject
         message.to = self.email_ids
