@@ -1,4 +1,4 @@
-application: lagr
+application: log-collector-dev
 version: 1
 runtime: python27
 api_version: 1
@@ -7,6 +7,7 @@ threadsafe: true
 handlers:
 - url: /.*
   script: lagr.server.pkg_loader.app
+  login: admin
 
 inbound_services:
 - channel_presence
