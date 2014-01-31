@@ -65,11 +65,9 @@ class HideBelowThreshold(Trigger):
         if existing == 0:
             memcache.add(key=self.id, value=1, time=1)
         else:
-            logger.info("------------------ ELSE")
             memcache.incr(self.id)
             existing += 1
 
-            logger.info("--------- Condition = %s" % existing == self.threshold)
             if existing == self.threshold:
                 map(lambda x: x.execute(log), self.plugins)
                 memcache.delete(key=self.id)

@@ -1,6 +1,8 @@
 import flask
 
 lagr_server = flask.Flask(__name__)
+lagr_server.config.update({'HIPCHAT_API_TOKEN': '329c9b499ffb8d087a8cd6988e8084'})
+
 from .api import api_bp
 lagr_server.register_blueprint(api_bp, url_prefix='/lagr/api')
 
