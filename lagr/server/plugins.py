@@ -3,7 +3,7 @@ try:
 except ImportError:
     pass
 
-from lagr.server.models import Log
+from .models import Log
 
 import requests
 import logging
@@ -38,10 +38,13 @@ class HideBelowThreshold(Trigger):
     def serialize(self, log):
         if self.id == None:
             self.id = str(hash("%s.%s" % (log.filename, log.lineno)))
+        index = self.__module__.split(".").index('lagr')
+        path = self.__module__.split(".", index)[1]
+        key = "%s.%s" % (path, self.__class__.__name__)
 
         return {
             'id': self.id,
-            'key': "%s.%s" % (self.__class__.__module__, self.__class__.__name__),
+            'key': key,
             'threshold': self.threshold,
             'plugins': map(lambda x: x.serialize(), self.plugins)
         }
@@ -62,8 +65,11 @@ class HideBelowThreshold(Trigger):
         if existing == 0:
             memcache.add(key=self.id, value=1, time=1)
         else:
+            logger.info("------------------ ELSE")
             memcache.incr(self.id)
             existing += 1
+
+            logger.info("--------- Condition = %s" % existing == self.threshold)
             if existing == self.threshold:
                 map(lambda x: x.execute(log), self.plugins)
                 memcache.delete(key=self.id)
@@ -77,9 +83,12 @@ class Plugin(Serializable):
         raise NotImplementedError('Must be implemented by the subclasses')
 
     def base_info(self):
-
+        # This is needed because in client apps the path of the plugins will be different from the one on the server.
+        index = self.__module__.split(".").index('lagr')
+        path = self.__module__.split(".", index)[1]
+        key = "%s.%s" % (path, self.__class__.__name__)
         return {
-            'key': "%s.%s" % (self.__class__.__module__, self.__class__.__name__),
+            'key': key,
         }
 
 

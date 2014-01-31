@@ -52,8 +52,6 @@ class LagrHandler(logging.Handler):
 
         if hasattr(r, 'trigger'):
                 dd['trigger'] = r.trigger.serialize(r)
-
-        print json.dumps(dd)
         return dd
 
     def handleError(self, record):
@@ -85,6 +83,7 @@ class LagrGAEHandler(LagrHandler):
         super(LagrGAEHandler, self).__init__(application=application, host=host, proto=proto, url=url, level=level)
 
     def make_request(self, data):
+        print "------- MAKING REQUEST"
         url = '%(proto)s://%(host)s/%(url)s' % {
                 'proto': self.proto,
                 'host': self.host,
@@ -100,7 +99,6 @@ class LagrGAEHandler(LagrHandler):
             method='POST',
             headers={'Content-Type':'application/json'},
             deadline=self.deadline)
-
         if self.async:
             return future
 

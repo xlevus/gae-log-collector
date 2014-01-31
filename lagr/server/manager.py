@@ -18,9 +18,11 @@ class LogManager(object):
             for plugin in plugins:
                 plugin_key = plugin.pop("key")
                 klass = import_string(plugin_key)
+                logger.debug("Plugin: %s Klass: %s" % (plugin, klass))
                 plugin_obj = klass(**plugin)
                 trigger_obj.add(plugin_obj)
 
+            logger.info("--------------- VERIFYING")
             # Plugin execution
             trigger_obj.verify(log)
 

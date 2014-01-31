@@ -5,6 +5,9 @@ api_version: 1
 threadsafe: true
 
 handlers:
+- url: /lagr/.*
+  script: lagr.server.pkg_loader.app
+
 - url: /.*
   script: lagr.server.pkg_loader.app
   login: admin
