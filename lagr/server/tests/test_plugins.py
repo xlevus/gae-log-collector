@@ -4,6 +4,7 @@ import flask
 from lagr.server import plugins
 from lagr.server.models import Log
 from google.appengine.ext import testbed
+from google.appengine.api import mail
 from google.appengine.api import memcache
 from lagr.server.plugins import requests
 
@@ -216,4 +217,73 @@ class ExpirationTest(BaseTests):
         expiration = plugins.Expiration(hours=1)
         expiration.execute(self.log)
         self.assertEqual(Log.query().count(),1)
+
+class EmailAlertPluginTests(BaseTests):
+
+    def setUp(self):
+        super(EmailAlertPluginTests, self).setUp()
+        self.log = {
+            "msg_args": [],
+            "line_number": 48,
+            "func_name": "test_view",
+            "module": "ui",
+            "level_number": 20,
+            "message": "Info message - should be shown on realtime monitor",
+            "exception": "integer division or modulo by zero",
+            "level": "INFO",
+            "trigger": {
+                "threshold": 5,
+                "id": "6961289232517810357",
+                "key": "lagr.server.plugins.HideBelowThreshold",
+                "plugins": [
+                    {
+                        "email_ids": ['a@b.com'],
+                        "key": "lagr.server.plugins.EmailAlert"
+                    }
+                ]
+            },
+            "traceback": [
+                "  File \"/Users/bruno.ripa/dev/gamesys_ve/gae-log-collector/lagr/server/ui.py\", line 42, in test_view\n    1/0\n"
+            ],
+            "filename": "ui.py",
+            "application": "Test app",
+            "raw_msg": "Info message - should be shown on realtime monitor",
+            "time": "14:35:50 29/01/2014"
+        }
+
+    def test_format(self):
+        """ Tests _format method. """
+
+        log = {
+            'application': "Test application",
+            'time': "10:00:00 1/1/2014",
+            'message': "Test message",
+            'traceback': 'some message',
+            'exception': 'fake excpetion'
+        }
+
+        email = plugins.EmailAlert(email_ids=['a@b.com'])
+        result = email._format(log)
+        expected = email.TEMPLATE % log
+        self.assertEqual(result, expected)
+
+    def test_serialize(self):
+        """ Tests serialize method. """
+
+        email = plugins.EmailAlert(email_ids=['a@b.com'])
+        result =  email.serialize()
+        expected = {
+            'key': "%s.%s" % (email.__module__, email.__class__.__name__),
+            'email_ids': ['a@b.com']
+        }
+
+        self.assertEqual(result, expected)
+
+    @mock.patch.object(mail.EmailMessage, 'send')
+    def test_execute_ok(self, send):
+        """ Tests execute method successes. """
+
+        mail = plugins.EmailAlert(email_ids=['a@b.com'])
+        mail.execute(self.log)
+        send.assert_once_called_with()
 

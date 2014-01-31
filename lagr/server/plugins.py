@@ -228,6 +228,6 @@ class EmailAlert(Plugin):
         message = mail.EmailMessage(sender='test@example.com')
         subject = 'LAGR monitor Alert - Application: %s - Timestamp: %s' % (log['application'], log['time'])
         message.subject = subject
-        message.to = ', '.join(self.email_ids)
+        message.to = self.email_ids
         message.html = self._format(log),
         message.send()
