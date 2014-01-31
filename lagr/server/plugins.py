@@ -10,9 +10,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-HIPCHAT_API_URL = 'https://api.hipchat.com/v1/'
 HIPCHAT_API_TOKEN = '329c9b499ffb8d087a8cd6988e8084'
-ROOM_MESSAGE_URL = 'rooms/message'
 
 
 class Serializable(object):
@@ -108,8 +106,9 @@ class HipChatAlert(Plugin):
     </table>
     """
 
-    def __init__(self, room):
+    def __init__(self, hipchat_token, room):
         self.room = room
+        self.token = hipchat_token
 
     def _format(self, log):
 
@@ -134,7 +133,7 @@ class HipChatAlert(Plugin):
     def execute(self, log):
         """ Reacts to the trigger. """
         logger.info("<<< Executing %s" % self.__class__.__name__)
-        url = "%s%s?auth_token=%s" % (HIPCHAT_API_URL, ROOM_MESSAGE_URL, HIPCHAT_API_TOKEN)
+        url = "%s%s?auth_token=%s" % ('https://api.hipchat.com/v1/', 'rooms/message', self.token)
         data = {
             'room_id': self.room,
             'from': "Lagr Monitor",
