@@ -1,0 +1,3 @@
+queue:
+- name: logs-queue
+  mode: pull
