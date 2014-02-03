@@ -23,6 +23,7 @@ class PullQueueHandler(object):
         self._q = taskqueue.Queue(name=self._queue_name)
 
     def inject(self, payload):
+        print "**************** INJECT: %s" % payload
         if payload is not None:
             if type in (list, tuple) is False:
                 raise TypeError('%s.inject takes a list or a tuple in input, got a %s' % (self.__class__.__name__, type(payload)))
@@ -46,11 +47,14 @@ class PullQueueHandler(object):
 
 queue_monitor_bp = flask.Blueprint('queue', __name__)
 
-class QueueMonitor(flask.views.MethodView):
 
-    def get(self):
+class QueueMonitor(flask.views.MethodView):
+    methods = ['POST']
+
+    def post(self):
         pqh = PullQueueHandler(queue_name='logs-queue')
         try:
+            import pdb; pdb.set_trace()
             tasks = pqh.lease()
         except PullQueueHandler.UnableToExtractTasks:
             # Not logging, the queue itself logs this.

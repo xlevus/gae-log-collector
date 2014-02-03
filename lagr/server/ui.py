@@ -3,8 +3,8 @@ import os
 import sys
 import traceback
 import logging
-from lagr.client import LagrGAEHandler
-from lagr.server import plugins
+from logcollector.lagr.client import LagrGAEHandler
+from logcollector.lagr.server import plugins
 
 from .channels import manager
 
@@ -27,12 +27,13 @@ logger = logging.getLogger(__name__)
 logger2 = logging.getLogger(__name__)
 
 logger.setLevel(logging.DEBUG)
-logger.addHandler(LagrGAEHandler(application=APP, host=HOST, proto=PROTO, url=URL, level=logging.DEBUG,async=False))
+logger.addHandler(LagrGAEHandler(application=APP, host=HOST, proto=PROTO, url=URL, level=logging.DEBUG, async=True))
 
 
 
 logger2.setLevel(logging.DEBUG)
-logger2.addHandler(LagrGAEHandler(application="Test App 2", host=HOST, proto=PROTO, url=URL, level=logging.DEBUG,async=False))
+logger2.addHandler(LagrGAEHandler(application="Test App 2", host=HOST, proto=PROTO, url=URL, level=logging.DEBUG,
+                                  async=True))
 
 # @ui_bp.route('/test_view')
 def test_view():
@@ -52,10 +53,10 @@ def test_view():
                 'exception': e.message,
                 'traceback': traceback.format_tb(exc_traceback, 20)
                 })
-            logger2.info("Info message - should be shown on realtime monitor", extra={
-                'trigger': trigger,
-                'exception': e.message,
-                'traceback': traceback.format_tb(exc_traceback, 20)
-                })
+            # logger2.info("Info message - should be shown on realtime monitor", extra={
+            #     'trigger': trigger,
+            #     'exception': e.message,
+            #     'traceback': traceback.format_tb(exc_traceback, 20)
+            #     })
     return "Sent."
 

@@ -73,6 +73,7 @@ class LagrHandler(logging.Handler):
             data=json.dumps(record))
 
         response = urllib2.urlopen(req)
+        print "Response: %s" % response.status
 
 
 class LagrGAEHandler(LagrHandler):
@@ -83,12 +84,13 @@ class LagrGAEHandler(LagrHandler):
         super(LagrGAEHandler, self).__init__(application=application, host=host, proto=proto, url=url, level=level)
 
     def make_request(self, data):
-        print "------- MAKING REQUEST"
         url = '%(proto)s://%(host)s/%(url)s' % {
                 'proto': self.proto,
                 'host': self.host,
                 'url': self.url
             }
+
+        print "------- MAKING REQUEST to url=%s" % url
 
         from google.appengine.ext import ndb
         ctx = ndb.get_context()
@@ -99,6 +101,7 @@ class LagrGAEHandler(LagrHandler):
             method='POST',
             headers={'Content-Type':'application/json'},
             deadline=self.deadline)
+
         if self.async:
             return future
 
