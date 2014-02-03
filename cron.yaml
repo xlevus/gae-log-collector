@@ -2,3 +2,7 @@ cron:
 - description: Daily log cleanup
   url: /_q/LogDeletionQueue/
   schedule: every 1 hours
+
+- description: Queue monitor
+  url: /_q/QueueMonitor/
+  schedule: every 1 hours

@@ -15,3 +15,8 @@ lagr_server.register_blueprint(channel_bp)
 from .taskqueues import LogDeletionQueue
 from .taskqueues import log_deletion_bp
 lagr_server.register_blueprint(log_deletion_bp, url_prefix='/_q')
+
+from queue import queue_monitor_bp
+lagr_server.register_blueprint(queue_monitor_bp, url_prefix='/_q')
+
+print lagr_server.url_map
